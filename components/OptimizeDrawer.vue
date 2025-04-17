@@ -1,46 +1,44 @@
 <template lang="pug">
-v-navigation-drawer.pa-6(
+v-navigation-drawer(
   permanent
   location="end"
   width="500"
 )
-  .text-overline Long Edge
-
-  v-item-group(
-    v-model="longEdge"
-  )
-    v-row.mb-4
-      v-col(
-        cols=6
-        v-for="size in sizes"
-        :key="size"
-        :value="size"
-      )
-        v-item(
-          v-slot="{ isSelected, toggle }"
-          :value="size"
-        )
-          v-btn(
-            block
-            :color="isSelected ? 'primary' : 'default'"
-            @click="toggle"
-            :variant="isSelected ? 'elevated' : 'tonal'"
-          ) {{ size }}
-
-    v-text-field(
-      v-model="customLongEdge"
-      label="Custom Max Long Edge"
-      type="number"
-      min="1"
-      class="mt-2"
-      @input="onCustomLongEdgeInput"
-      hint="Sets the maximum value for the longest side (width or height) of the image."
-      persistent-hint
-    )
-
-    .text-overline Formats
+  .pa-6
+    .text-overline.mb-2 Long Edge
 
     v-item-group(
+      v-model="longEdge"
+    )
+      v-row.mb-4
+        v-col(
+          cols=6
+          v-for="size in sizes"
+          :key="size"
+          :value="size"
+        )
+          v-item(
+            v-slot="{ isSelected, toggle }"
+            :value="size"
+          )
+            v-btn(
+              block
+              :color="isSelected ? 'primary' : 'default'"
+              @click="toggle"
+              :variant="isSelected ? 'elevated' : 'tonal'"
+            ) {{ size }}
+
+    v-text-field.mb-8(
+      v-model.number="customLongEdge"
+      label="Custom Value"
+      type="number"
+      min="1"
+      @input="onCustomLongEdgeInput"
+    )
+
+    .text-overline.mb-2 Formats
+
+    v-item-group.mb-8(
       v-model="format"
     )
       v-row.mb-4
@@ -63,10 +61,12 @@ v-navigation-drawer.pa-6(
     .text-overline Quality
 
     v-slider(
+      color="primary"
       v-model="quality"
       min="1"
       max="100"
       step="1"
+      thumb-label="always"
     )
 
     .text-overline Rename
@@ -76,22 +76,26 @@ v-navigation-drawer.pa-6(
       label="Sequence"
     )
 
-    v-btn(
+    v-btn.mb-4(
       block
       color="primary"
       height="68"
+      elevation=10
       @click="processAllImages"
       :disabled="!props.files || props.files.length === 0"
-    ) Process All
+    ) Process {{ props.files.length }} Images
 
-    <div v-if="outputUrl">
-      <img :src="outputUrl" style="max-width: 100%; margin-top: 16px;" />
-    </div>
+    v-btn(
+      variant="tonal"
+      block
+      height="60"
+      color="grey-darken-1"
+      @click="clearAll"
+    ) Clear
 </template>
 
 <script setup>
 import imageCompression from 'browser-image-compression'
-import { ref, watch, defineProps } from 'vue'
 
 const props = defineProps({
   files: {
@@ -99,6 +103,8 @@ const props = defineProps({
     default: () => []
   }
 })
+
+const emit = defineEmits(['clear'])
 
 const sizes = [1920, 1440, 1000, 500]
 const formats = ['JPEG', 'PNG', 'WebP']
@@ -109,7 +115,6 @@ const quality = ref(70)
 const sequence = ref(null)
 const customLongEdge = ref('')
 const selectedFile = ref(null)
-const outputUrl = ref(null)
 
 function onCustomLongEdgeInput () {
   // If the user enters a value, update longEdge to that value
@@ -183,6 +188,18 @@ async function processAllImages () {
       alert('Error processing image: ' + (file.name || '') + ': ' + err)
     }
   }
+  // Call clearAll after all images are processed
+  clearAll()
+}
+
+function clearAll () {
+  // Reset all local state to initial values
+  longEdge.value = sizes[0]
+  customLongEdge.value = ''
+  format.value = formats[0]
+  quality.value = 80
+  sequence.value = ''
+  emit('clear') // Notify parent to clear files
 }
 </script>
 

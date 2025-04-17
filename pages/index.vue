@@ -1,15 +1,15 @@
 <template lang="pug">
-v-container(
+v-container.h-screen(
   fluid
 )
   //- Permanent navigation drawer for optimization options
-  v-row.h-screen(
+  v-row.h-100(
     align="center"
   )
     v-col.h-100
       //- Show preview grid if files exist, else show DropZone
       template(v-if="files.length > 0")
-        OptimizeDrawer(:files="files")
+        OptimizeDrawer(:files="files" @clear="files = []")
         PreviewGrid(:files="files")
       template(v-else)
         DropZone(@files-dropped="onFilesDropped")

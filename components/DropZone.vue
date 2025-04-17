@@ -7,14 +7,8 @@
     @drop.prevent="onDrop"
   >
     <slot>
-      <div class="text-overline">
+      <div class="text-overline text-grey-darken-1">
         Drop Image(s) here
-      </div>
-      <div class="text-overline text-grey">
-        Or
-      </div>
-      <div class="text-overline">
-        Click to select
       </div>
     </slot>
   </div>
@@ -51,6 +45,7 @@ function onDrop (e) {
   transition: background 0.2s, border-color 0.2s;
   cursor: pointer;
 }
+
 .drop-zone.drag-over {
   background: #f5f5f5;
   border-color: #1976d2;
