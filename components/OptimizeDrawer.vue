@@ -81,8 +81,8 @@ v-navigation-drawer(
       color="primary"
       height="68"
       elevation=10
-      @click="processAllImages"
-      :disabled="!props.files || props.files.length === 0"
+      @click="downloadAllProcessed"
+      :disabled="!props.files || !props.files.length || !props.files[0].processedBlob"
     ) Process {{ props.files.length }} Images
 
     v-btn(
@@ -96,6 +96,7 @@ v-navigation-drawer(
 
 <script setup>
 import imageCompression from 'browser-image-compression'
+import { ref, watch, onMounted, defineProps, defineEmits, onUnmounted, computed } from 'vue'
 
 const props = defineProps({
   files: {
@@ -104,7 +105,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['clear'])
+const emit = defineEmits(['clear', 'update:files'])
 
 const sizes = [1920, 1440, 1000, 500]
 const formats = ['JPEG', 'PNG', 'WebP']
@@ -130,12 +131,24 @@ watch(longEdge, (val, oldVal) => {
   }
 })
 
+// Utility to create a signature for the files array
+function filesSignature (files) {
+  if (!Array.isArray(files)) { return '' }
+  return files.map((f) => {
+    const fileObj = f.file || f
+    return [fileObj?.name, fileObj?.size, fileObj?.lastModified, fileObj?.url].join(':')
+  }).join('|')
+}
+
+const filesSig = computed(() => filesSignature(props.files))
+
 // If files are passed as prop, select the first file by default
 watch(
-  () => props.files,
-  (newFiles) => {
+  filesSig,
+  (newSig, oldSig) => {
+    console.log('[OptimizeDrawer] filesSig changed:', { newSig, oldSig })
+    const newFiles = props.files
     if (Array.isArray(newFiles) && newFiles.length > 0) {
-      // Use the original File object if available
       selectedFile.value = newFiles[0].file || newFiles[0]
     } else {
       selectedFile.value = null
@@ -143,6 +156,35 @@ watch(
   },
   { immediate: true }
 )
+
+// Simple debounce utility
+function debounce (fn, delay) {
+  let timeout
+  function debounced (...args) {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn.apply(this, args), delay)
+  }
+  debounced.cancel = () => clearTimeout(timeout)
+  return debounced
+}
+
+const debouncedProcessAllImages = debounce(processAllImages, 300) // 300ms debounce
+
+onMounted(processAllImages)
+
+watch([
+  longEdge,
+  format,
+  quality,
+  sequence,
+  filesSig
+], () => {
+  debouncedProcessAllImages()
+})
+
+onUnmounted(() => {
+  debouncedProcessAllImages.cancel && debouncedProcessAllImages.cancel()
+})
 
 // Process all files in props.files
 async function processAllImages () {
@@ -157,6 +199,9 @@ async function processAllImages () {
 
   // Prepare base name and extension
   const baseName = sequence.value || ''
+
+  // We'll build a new array to emit
+  const processedFiles = []
 
   for (let i = 0; i < props.files.length; i++) {
     const fileObj = props.files[i]
@@ -175,21 +220,50 @@ async function processAllImages () {
         // fallback: use original name
         newName = file.name
       }
-      // Trigger download
-      const link = document.createElement('a')
-      link.href = url
-      link.download = newName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      // Optionally, you can revoke the object URL after download
-      // URL.revokeObjectURL(url)
+      // Extract base names (sans extension) from original and new names
+      const getBaseName = name => name.replace(/\.[^/.]+$/, '')
+      const originalBaseName = getBaseName(file.name)
+      const newBaseName = getBaseName(newName)
+      const nameChanged = originalBaseName !== newBaseName
+      // Build processed file object
+      processedFiles.push({
+        ...fileObj,
+        originalSize: file.size,
+        newSize: compressedFile.size,
+        processedBlob: compressedFile,
+        processedUrl: url,
+        newName,
+        originalBaseName,
+        newBaseName,
+        nameChanged
+      })
     } catch (err) {
       alert('Error processing image: ' + (file.name || '') + ': ' + err)
     }
   }
-  // Call clearAll after all images are processed
-  clearAll()
+  // Emit the processed files so parent can update
+  emit('update:files', processedFiles)
+  // Optionally, you can clearAll here if you want to reset UI
+  // clearAll()
+}
+
+// Download all processed images
+function downloadAllProcessed () {
+  if (!Array.isArray(props.files) || props.files.length === 0) { return }
+  for (let i = 0; i < props.files.length; i++) {
+    const fileObj = props.files[i]
+    if (fileObj.processedBlob && fileObj.newName) {
+      const url = fileObj.processedUrl || URL.createObjectURL(fileObj.processedBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileObj.newName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      // Optionally, revoke the object URL if you created it here
+      if (!fileObj.processedUrl) { URL.revokeObjectURL(url) }
+    }
+  }
 }
 
 function clearAll () {

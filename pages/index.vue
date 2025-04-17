@@ -9,7 +9,7 @@ v-container.h-screen(
     v-col.h-100
       //- Show preview grid if files exist, else show DropZone
       template(v-if="files.length > 0")
-        OptimizeDrawer(:files="files" @clear="files = []")
+        OptimizeDrawer(:files="files" @clear="files = []" @update:files="files = $event")
         PreviewGrid(:files="files")
       template(v-else)
         DropZone(@files-dropped="onFilesDropped")

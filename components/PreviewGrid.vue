@@ -2,14 +2,23 @@
 .preview-grid
   //- TODO: Replace with actual image previews
   .file-list(v-if="files && files.length" :style="gridStyle")
-    v-card.file-item(
+    v-card.file-item.d-flex(
       width="100%"
       flat
       tile
       height="100%"
-      :image="file.url"
       v-for="(file, i) in files" :key="i"
     )
+      template(#image)
+        v-img(
+          :src="file.processedUrl || file.url"
+          cover
+          gradient="rgba(0,0,0,0), rgba(0,0,0,.5)"
+        )
+      .mt-auto.text-white.w-100.d-flex
+        span(class="text-caption" v-if="file.originalBaseName !== file.newBaseName") {{ file.newBaseName }}
+        .text-caption.ml-auto
+          span {{ formatSize(file.newSize) }}
 </template>
 
 <script setup>
@@ -20,6 +29,14 @@ const props = defineProps({
     default: () => []
   }
 })
+
+function formatSize (size) {
+  if (typeof size !== 'number') { return '' }
+  if (size < 1024) { return '1.0 kB' }
+  const kb = size / 1024
+  if (kb < 1000) { return kb.toFixed(1) + ' kB' }
+  return (kb / 1024).toFixed(2) + ' MB'
+}
 
 const gridStyle = computed(() => {
   const count = props.files.length
@@ -64,11 +81,6 @@ const gridStyle = computed(() => {
   border-radius: 8px;
   font-size: 0.9rem;
   aspect-ratio: 1 / 1;
-}
-.file-name {
-  word-break: break-all;
-  text-align: center;
-  font-size: 0.85rem;
-  margin-top: 2px;
+  position: relative;
 }
 </style>
