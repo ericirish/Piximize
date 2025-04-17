@@ -264,6 +264,8 @@ function downloadAllProcessed () {
       if (!fileObj.processedUrl) { URL.revokeObjectURL(url) }
     }
   }
+
+  clearAll()
 }
 
 function clearAll () {
