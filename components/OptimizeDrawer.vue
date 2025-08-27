@@ -74,6 +74,8 @@ v-navigation-drawer(
     v-text-field(
       v-model="sequence"
       label="Sequence"
+      placeholder="e.g., vacation-photos"
+      persistent-hint
     )
 
     v-btn.mb-4(
@@ -190,6 +192,9 @@ onUnmounted(() => {
 async function processAllImages () {
   if (!Array.isArray(props.files) || props.files.length === 0) { return }
 
+  console.log('[OptimizeDrawer] Processing images with sequence:', sequence.value)
+  console.log('[OptimizeDrawer] Sequence type:', typeof sequence.value, 'Length:', sequence.value?.length)
+
   const options = {
     maxWidthOrHeight: Number(longEdge.value),
     initialQuality: quality.value / 100,
@@ -198,7 +203,10 @@ async function processAllImages () {
   }
 
   // Prepare base name and extension
-  const baseName = sequence.value || ''
+  const baseName = sequence.value?.trim() || ''
+  const ext = format.value === 'JPEG' ? '.jpg' : format.value === 'PNG' ? '.png' : '.webp'
+
+  console.log('[OptimizeDrawer] Base name:', baseName, 'Extension:', ext, 'Format:', format.value)
 
   // We'll build a new array to emit
   const processedFiles = []
@@ -209,22 +217,34 @@ async function processAllImages () {
     try {
       const compressedFile = await imageCompression(file, options)
       const url = URL.createObjectURL(compressedFile)
-      // Determine extension based on format
-      let ext = '.webp'
-      if (format.value === 'JPEG') { ext = '.jpg' } else if (format.value === 'PNG') { ext = '.png' }
-      // Sequence naming if sequence present
+
+      // Generate new name based on sequence or original
       let newName
       if (baseName) {
-        newName = `${baseName}-${i+1}${ext}`
+        // Use sequence naming: baseName-1.ext, baseName-2.ext, etc.
+        newName = `${baseName}-${i + 1}${ext}`
+        console.log(`[OptimizeDrawer] File ${i + 1} using sequence naming:`, newName)
       } else {
-        // fallback: use original name
-        newName = file.name
+        // Use original name but change extension to match format
+        const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+        newName = `${originalNameWithoutExt}${ext}`
+        console.log(`[OptimizeDrawer] File ${i + 1} using original naming:`, newName)
       }
-      // Extract base names (sans extension) from original and new names
-      const getBaseName = name => name.replace(/\.[^/.]+$/, '')
-      const originalBaseName = getBaseName(file.name)
-      const newBaseName = getBaseName(newName)
+
+      // Extract base names (sans extension) for comparison
+      const originalBaseName = file.name.replace(/\.[^/.]+$/, '')
+      const newBaseName = newName.replace(/\.[^/.]+$/, '')
       const nameChanged = originalBaseName !== newBaseName
+
+      console.log(`[OptimizeDrawer] File ${i + 1}:`, {
+        original: file.name,
+        new: newName,
+        nameChanged,
+        baseName,
+        originalBaseName,
+        newBaseName
+      })
+
       // Build processed file object
       processedFiles.push({
         ...fileObj,

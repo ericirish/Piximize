@@ -16,6 +16,8 @@ v-container.h-screen(
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const files = ref([])
 
 function onFilesDropped (droppedFiles) {

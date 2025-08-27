@@ -15,8 +15,10 @@
           cover
           gradient="rgba(0,0,0,0), rgba(0,0,0,.5)"
         )
-      .mt-auto.text-white.w-100.d-flex
-        span(class="text-caption" v-if="file.originalBaseName !== file.newBaseName") {{ file.newBaseName }}
+      .mt-auto.text-white.w-100.d-flex.flex-column
+        .text-caption.mb-1(v-if="file.nameChanged")
+          .text-truncate {{ file.newName }}
+          .text-caption.text-grey-lighten-2 {{ file.originalBaseName }}
         .text-caption.ml-auto
           span {{ formatSize(file.newSize) }}
 </template>
