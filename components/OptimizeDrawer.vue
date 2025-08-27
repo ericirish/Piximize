@@ -69,6 +69,28 @@ v-navigation-drawer(
       thumb-label="always"
     )
 
+    .text-overline Crop
+
+    v-item-group(
+      v-model="aspectRatio"
+    )
+      v-row.mb-4
+        v-col(
+          cols=4
+          v-for="ratio in aspectRatios"
+          :key="ratio.value"
+        )
+          v-item(
+            v-slot="{ isSelected, toggle }"
+            :value="ratio.value"
+          )
+            v-btn(
+              block
+              :color="isSelected ? 'primary' : 'default'"
+              @click="toggle"
+              :variant="isSelected ? 'elevated' : 'tonal'"
+            ) {{ ratio.label }}
+
     .text-overline Rename
 
     v-text-field(
@@ -112,12 +134,19 @@ const emit = defineEmits(['clear', 'update:files'])
 const sizes = [1920, 1440, 1000, 500]
 const formats = ['JPEG', 'PNG', 'WebP']
 
+const aspectRatios = [
+  { value: 'original', label: 'Original' },
+  { value: '16:9', label: '16:9' },
+  { value: '1:1', label: '1:1' }
+]
+
 const longEdge = ref(1920)
 const format = ref('JPEG')
 const quality = ref(70)
 const sequence = ref(null)
 const customLongEdge = ref('')
 const selectedFile = ref(null)
+const aspectRatio = ref('original')
 
 function onCustomLongEdgeInput () {
   // If the user enters a value, update longEdge to that value
@@ -172,6 +201,66 @@ function debounce (fn, delay) {
 
 const debouncedProcessAllImages = debounce(processAllImages, 300) // 300ms debounce
 
+// Function to crop image to specific aspect ratio
+async function cropImage(file, targetAspectRatio) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+
+    img.onload = () => {
+      const { width: originalWidth, height: originalHeight } = img
+
+      if (targetAspectRatio === 'original') {
+        // No cropping needed
+        canvas.width = originalWidth
+        canvas.height = originalHeight
+        ctx.drawImage(img, 0, 0)
+        resolve(canvas)
+        return
+      }
+
+      let targetWidth, targetHeight
+
+      if (targetAspectRatio === '16:9') {
+        // 16:9 aspect ratio
+        if (originalWidth / originalHeight > 16/9) {
+          // Image is wider than 16:9, crop width
+          targetHeight = originalHeight
+          targetWidth = originalHeight * (16/9)
+        } else {
+          // Image is taller than 16:9, crop height
+          targetWidth = originalWidth
+          targetHeight = originalWidth * (9/16)
+        }
+      } else if (targetAspectRatio === '1:1') {
+        // 1:1 (square) aspect ratio
+        const size = Math.min(originalWidth, originalHeight)
+        targetWidth = size
+        targetHeight = size
+      }
+
+      // Calculate crop position (center crop)
+      const cropX = (originalWidth - targetWidth) / 2
+      const cropY = (originalHeight - targetHeight) / 2
+
+      canvas.width = targetWidth
+      canvas.height = targetHeight
+
+      // Draw the cropped portion
+      ctx.drawImage(
+        img,
+        cropX, cropY, targetWidth, targetHeight,
+        0, 0, targetWidth, targetHeight
+      )
+
+      resolve(canvas)
+    }
+
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 onMounted(processAllImages)
 
 watch([
@@ -215,7 +304,19 @@ async function processAllImages () {
     const fileObj = props.files[i]
     const file = fileObj.file || fileObj
     try {
-      const compressedFile = await imageCompression(file, options)
+      let fileToProcess = file
+
+      // Apply cropping if needed
+      if (aspectRatio.value !== 'original') {
+        const croppedCanvas = await cropImage(file, aspectRatio.value)
+        // Convert canvas to blob for further processing
+        const croppedBlob = await new Promise(resolve => {
+          croppedCanvas.toBlob(resolve, 'image/jpeg', 1.0)
+        })
+        fileToProcess = new File([croppedBlob], file.name, { type: 'image/jpeg' })
+      }
+
+      const compressedFile = await imageCompression(fileToProcess, options)
       const url = URL.createObjectURL(compressedFile)
 
       // Generate new name based on sequence or original
@@ -295,6 +396,7 @@ function clearAll () {
   format.value = formats[0]
   quality.value = 80
   sequence.value = ''
+  aspectRatio.value = 'original'
   emit('clear') // Notify parent to clear files
 }
 </script>
