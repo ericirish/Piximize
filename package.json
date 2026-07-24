@@ -8,34 +8,28 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
-    "lint": "npm lint:js"
-  },
-  "overrides": {
-    "vue": "latest"
+    "lint": "npm run lint:js"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^1.0.0",
+    "@nuxt/devtools": "^3.3.1",
     "@nuxtjs/eslint-config-typescript": "^12.1.0",
-    "@pinia/nuxt": "^0.7.0",
-    "@types/node": "^20.8.8",
-    "@vite-pwa/nuxt": "^1.0.0",
-    "eslint": "^8.45.0",
+    "@types/node": "^22.15.32",
+    "@vite-pwa/nuxt": "^1.1.1",
+    "eslint": "^8.57.1",
     "eslint-plugin-nuxt": "^4.0.0",
-    "eslint-plugin-vue": "^9.15.1",
-    "nuxt": "^3.6.5",
-    "nuxt-gtag": "^1.1.1",
-    "pinia": "^2.1.7",
-    "pug": "^3.0.2",
-    "pug-plain-loader": "^1.1.0",
-    "typescript": "^5.2.2"
+    "eslint-plugin-vue": "^9.33.0",
+    "nuxt": "^4.5.0",
+    "pug": "^3.0.4",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@mdi/js": "^7.4.47",
-    "@nuxt/content": "^2.9.0",
-    "@nuxt/fonts": "^0.10.2",
+    "@nuxt/fonts": "^0.14.0",
     "browser-image-compression": "^2.0.2",
-    "sass": "^1.80.6",
-    "vuetify": "^3.3.23",
-    "vuetify-nuxt-module": "^0.18.3"
+    "sass": "^1.101.7",
+    "vuetify": "^3.12.11",
+    "vuetify-nuxt-module": "^0.19.5"
+  },
+  "engines": {
+    "node": "^22.19.0 || ^24.11.0 || >=26.0.0"
   }
 }

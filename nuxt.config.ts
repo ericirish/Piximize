@@ -1,4 +1,6 @@
 export default defineNuxtConfig({
+  compatibilityDate: '2026-07-24',
+
   devtools: { enabled: false },
   ssr: true,
 
@@ -13,9 +15,9 @@ export default defineNuxtConfig({
     head: {
       title: 'Piximize',
       meta: [
-        { hid: 'og:image', property: 'og:image', content: '' },
-        { hid: 'og:title', property: 'og:title', content: '' },
-        { hid: 'og:description', property: 'og:description', content: '' }
+        { property: 'og:image', content: '' },
+        { property: 'og:title', content: '' },
+        { property: 'og:description', content: '' }
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicons/favicon.ico' },
@@ -36,10 +38,6 @@ export default defineNuxtConfig({
     }
   },
 
-  experimental: {
-    reactivityTransform: true
-  },
-
   typescript: {
     shim: false
   },
@@ -49,9 +47,6 @@ export default defineNuxtConfig({
   ],
 
   modules: [
-    '@pinia/nuxt',
-    'nuxt-gtag',
-    '@nuxt/content',
     'vuetify-nuxt-module',
     '@nuxt/fonts',
     '@vite-pwa/nuxt'
@@ -59,7 +54,7 @@ export default defineNuxtConfig({
 
   vuetify: {
     moduleOptions: {
-      styles: { configFile: '/styles/settings.scss' }
+      styles: { configFile: 'styles/settings.scss' }
     },
     vuetifyOptions: {
       defaults: {},
@@ -75,22 +70,10 @@ export default defineNuxtConfig({
 
             }
           }
-          // You can also define a dark theme
-          // dark: {
-          //   dark: true,
-          //   colors: {
-          //     primary: '#2196F3'
-          //     // ... other colors
-          //   }
-          // }
         }
       }
     }
   },
-
-  // gtag: {
-  //   id: 'G-'
-  // },
 
   pwa: {
     strategies: 'generateSW',
@@ -119,25 +102,19 @@ export default defineNuxtConfig({
           type: 'image/png',
           purpose: 'any'
         }
-        // {
-        //   src: 'maskable-icon-512x512.png',
-        //   sizes: '512x512',
-        //   type: 'image/png',
-        //   purpose: 'maskable'
-        // }
       ]
     },
     workbox: {
       navigateFallback: '/',
       runtimeCaching: [{
         urlPattern: /^https:\/\//,
-        handler: 'NetworkFirst', // Always try network first
+        handler: 'NetworkFirst',
         options: {
-          networkTimeoutSeconds: 10, // Only wait 10 seconds before falling back to cache
+          networkTimeoutSeconds: 10,
           cacheName: 'api-cache',
           expiration: {
-            maxEntries: 50, // Keep fewer entries
-            maxAgeSeconds: 60 * 60 * 2 // Cache for only 2 hours
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 60 * 2
           }
         }
       }],
@@ -147,8 +124,6 @@ export default defineNuxtConfig({
     },
     client: {
       installPrompt: true,
-      // you don't need to include this: only for testing purposes
-      // if enabling periodic sync for update use 1 hour or so (periodicSyncForUpdates: 3600)
       periodicSyncForUpdates: process.env.NODE_ENV !== 'production' ? 20 : 3600
     },
     devOptions: {
@@ -166,11 +141,5 @@ export default defineNuxtConfig({
         pathPrefix: false
       }
     ]
-  },
-
-  imports: {
-    dirs: ['composables/**', 'stores/**']
-  },
-
-  compatibilityDate: '2024-11-12'
+  }
 })
