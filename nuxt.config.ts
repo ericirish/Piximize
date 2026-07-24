@@ -4,6 +4,29 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: true,
 
+  modules: [
+    '@nuxt/ui',
+    '@vite-pwa/nuxt'
+  ],
+
+  css: ['~/assets/css/main.css'],
+
+  ui: {
+    colorMode: false,
+    experimental: {
+      componentDetection: true
+    }
+  },
+
+  // Load icons from Iconify CDN at runtime instead of bundling collections.
+  icon: {
+    provider: 'iconify',
+    serverBundle: false,
+    clientBundle: {
+      scan: false
+    }
+  },
+
   runtimeConfig: {
     public: {
       baseUrl: 'http://localhost:3000',
@@ -40,39 +63,6 @@ export default defineNuxtConfig({
 
   typescript: {
     shim: false
-  },
-
-  css: [
-    '~/styles/main.scss'
-  ],
-
-  modules: [
-    'vuetify-nuxt-module',
-    '@nuxt/fonts',
-    '@vite-pwa/nuxt'
-  ],
-
-  vuetify: {
-    moduleOptions: {
-      styles: { configFile: 'styles/settings.scss' }
-    },
-    vuetifyOptions: {
-      defaults: {},
-      icons: {
-        defaultSet: 'mdi'
-      },
-      theme: {
-        defaultTheme: 'light',
-        themes: {
-          light: {
-            dark: false,
-            colors: {
-
-            }
-          }
-        }
-      }
-    }
   },
 
   pwa: {

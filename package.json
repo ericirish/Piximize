@@ -19,15 +19,15 @@
     "eslint-plugin-nuxt": "^4.0.0",
     "eslint-plugin-vue": "^9.33.0",
     "nuxt": "^4.5.0",
-    "pug": "^3.0.4",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@nuxt/fonts": "^0.14.0",
+    "@nuxt/ui": "^4.10.0",
+    "@tiptap/y-tiptap": "^3.0.7",
     "browser-image-compression": "^2.0.2",
-    "sass": "^1.101.7",
-    "vuetify": "^3.12.11",
-    "vuetify-nuxt-module": "^0.19.5"
+    "tailwindcss": "^4.3.3",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.31"
   },
   "engines": {
     "node": "^22.19.0 || ^24.11.0 || >=26.0.0"

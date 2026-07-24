@@ -1,8 +1,7 @@
-<template lang="pug">
-v-app
-  v-main
-    NuxtPage
+<template>
+  <div class="pix-shell">
+    <div class="pix-content">
+      <NuxtPage />
+    </div>
+  </div>
 </template>
-
-<script setup>
-</script>

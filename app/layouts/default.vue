@@ -1,13 +1,7 @@
-<script setup lang="ts">
-// Vuetify layout setup can go here
-</script>
-
-<template lang="pug">
-v-app
-  v-main
-    NuxtPage
+<template>
+  <div class="pix-shell">
+    <div class="pix-content">
+      <NuxtPage />
+    </div>
+  </div>
 </template>
-
-<style lang="scss">
-// Your SCSS styles here
-</style>

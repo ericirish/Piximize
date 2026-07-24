@@ -1,4 +1,5 @@
-<template lang="pug">
-//- SnackBar
-NuxtLayout
+<template>
+  <UApp>
+    <NuxtLayout />
+  </UApp>
 </template>
