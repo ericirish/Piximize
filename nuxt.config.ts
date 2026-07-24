@@ -38,25 +38,17 @@ export default defineNuxtConfig({
     head: {
       title: 'Piximize',
       meta: [
+        { name: 'theme-color', content: '#187bc0' },
+        { name: 'description', content: 'An easy way to optimize your images' },
         { property: 'og:image', content: '' },
-        { property: 'og:title', content: '' },
-        { property: 'og:description', content: '' }
+        { property: 'og:title', content: 'Piximize' },
+        { property: 'og:description', content: 'An easy way to optimize your images' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicons/favicon.ico' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-57x57.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-114x114.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-72x72.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-144x144.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-60x60.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-120x120.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-76x76.png' },
-        { rel: 'apple-touch-icon-precomposed', href: '/favicons/apple-touch-icon-152x152.png' },
-        { rel: 'icon', type: 'image/png', href: '/favicons/favicon-196x196.png' },
-        { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96.png' },
-        { rel: 'icon', type: 'image/png', href: '/favicons/favicon-32x32.png' },
-        { rel: 'icon', type: 'image/png', href: '/favicons/favicon-16x16.png' },
-        { rel: 'icon', type: 'image/png', href: '/favicons/favicon-128.png' }
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/pwa/ios/180.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/pwa/ios/32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/pwa/ios/16.png' }
       ]
     }
   },
@@ -68,13 +60,18 @@ export default defineNuxtConfig({
   pwa: {
     strategies: 'generateSW',
     registerType: 'autoUpdate',
+    injectRegister: 'auto',
+    registerWebManifestInRouteRules: true,
     manifest: {
       name: 'Piximize',
       short_name: 'Piximize',
       description: 'An easy way to optimize your images',
       theme_color: '#187bc0',
+      background_color: '#ffffff',
+      lang: 'en',
       start_url: '/',
       display: 'standalone',
+      orientation: 'portrait-primary',
       icons: [
         {
           src: '/pwa/64.png',
@@ -91,11 +88,19 @@ export default defineNuxtConfig({
           sizes: '512x512',
           type: 'image/png',
           purpose: 'any'
+        },
+        {
+          src: '/pwa/512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable'
         }
       ]
     },
     workbox: {
       navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,svg,ico,txt,woff2}'],
+      globIgnores: ['**/pwa/android/**', '**/pwa/ios/**', '**/pwa/windows11/**'],
       runtimeCaching: [{
         urlPattern: /^https:\/\//,
         handler: 'NetworkFirst',
@@ -114,10 +119,10 @@ export default defineNuxtConfig({
     },
     client: {
       installPrompt: true,
-      periodicSyncForUpdates: process.env.NODE_ENV !== 'production' ? 20 : 3600
+      periodicSyncForUpdates: 3600
     },
     devOptions: {
-      enabled: process.env.NODE_ENV === 'production',
+      enabled: false,
       suppressWarnings: true,
       type: 'module'
     }
